@@ -109,6 +109,25 @@ function App() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
+          <div className="stats-grid">
+            <div className="glass-card stat-card">
+              <div className="stat-value">{proposals.length}</div>
+              <div className="stat-label">Total Proposals</div>
+            </div>
+            <div className="glass-card stat-card">
+              <div className="stat-value">
+                {proposals.filter(p => !p.executed && Number(p.deadline) > Date.now() / 1000).length}
+              </div>
+              <div className="stat-label">Active Proposals</div>
+            </div>
+            <div className="glass-card stat-card">
+              <div className="stat-value">
+                {proposals.filter(p => p.executed).length}
+              </div>
+              <div className="stat-label">Completed Proposals</div>
+            </div>
+          </div>
+
           <CreateProposal onCreate={handleCreate} />
           
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>

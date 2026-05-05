@@ -28,6 +28,11 @@ const ProposalCard = ({ proposal, onVote, onExecute }) => {
         <div>
           <h3 style={{ margin: 0, color: 'var(--text-main)' }}>{proposal.title}</h3>
           <p style={{ color: 'var(--text-muted)', marginTop: '0.5rem' }}>{proposal.description}</p>
+          {!isExpired && !proposal.executed && (
+            <div style={{ fontSize: '0.75rem', color: 'var(--accent)', marginTop: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+              <Clock size={12} /> Ends in: {Math.floor((Number(proposal.deadline) - Date.now() / 1000) / 60)} mins
+            </div>
+          )}
         </div>
         <span className={`badge ${proposal.executed ? 'badge-passed' : isExpired ? (proposal.yesVotes > proposal.noVotes ? 'badge-passed' : 'badge-failed') : 'badge-active'}`}>
           {proposal.executed ? 'Executed' : isExpired ? (proposal.yesVotes > proposal.noVotes ? 'Passed' : 'Failed') : 'Active'}
@@ -42,6 +47,17 @@ const ProposalCard = ({ proposal, onVote, onExecute }) => {
         <div style={{ textAlign: 'center' }}>
           <div style={{ color: 'var(--danger)', fontWeight: 'bold', fontSize: '1.2rem' }}>{proposal.noVotes.toString()}</div>
           <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>AGAINST</div>
+        </div>
+
+        <div style={{ flex: 1, height: '8px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', overflow: 'hidden', display: 'flex' }}>
+          <div style={{ 
+            width: `${(Number(proposal.yesVotes) + Number(proposal.noVotes)) > 0 ? (Number(proposal.yesVotes) / (Number(proposal.yesVotes) + Number(proposal.noVotes)) * 100) : 50}%`, 
+            background: 'var(--success)' 
+          }} />
+          <div style={{ 
+            width: `${(Number(proposal.yesVotes) + Number(proposal.noVotes)) > 0 ? (Number(proposal.noVotes) / (Number(proposal.yesVotes) + Number(proposal.noVotes)) * 100) : 50}%`, 
+            background: 'var(--danger)' 
+          }} />
         </div>
 
         <div style={{ marginLeft: 'auto', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
