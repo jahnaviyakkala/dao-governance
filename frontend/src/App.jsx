@@ -3,6 +3,7 @@ import { Wallet, AlertCircle, RefreshCcw } from 'lucide-react';
 import { useWeb3 } from './hooks/useWeb3';
 import ProposalCard from './components/ProposalCard';
 import CreateProposal from './components/CreateProposal';
+import { motion, AnimatePresence } from 'framer-motion';
 
 function App() {
   const { account, contract, error, connectWallet } = useWeb3();
@@ -11,14 +12,29 @@ function App() {
   const [txPending, setTxPending] = useState(false);
 
   const fetchProposals = useCallback(async () => {
-    if (!contract) return;
+    if (!contract || !account) return;
     setLoading(true);
     try {
       const count = await contract.getProposalCount();
       const fetchedProposals = [];
       for (let i = 0; i < count; i++) {
         const prop = await contract.proposals(i);
-        fetchedProposals.push(prop);
+        const voted = await contract.hasVoted(i, account);
+        
+        // Convert proxy object to plain object to add custom property
+        const propObj = {
+          id: prop.id,
+          title: prop.title,
+          description: prop.description,
+          yesVotes: prop.yesVotes,
+          noVotes: prop.noVotes,
+          deadline: prop.deadline,
+          executed: prop.executed,
+          proposer: prop.proposer,
+          userHasVoted: voted
+        };
+        
+        fetchedProposals.push(propObj);
       }
       setProposals(fetchedProposals.reverse()); // Newest first
     } catch (err) {
@@ -26,7 +42,7 @@ function App() {
     } finally {
       setLoading(false);
     }
-  }, [contract]);
+  }, [contract, account]);
 
   useEffect(() => {
     fetchProposals();
@@ -60,6 +76,20 @@ function App() {
     }
   };
 
+  const handleExecute = async (id) => {
+    if (!contract) return;
+    setTxPending(true);
+    try {
+      const tx = await contract.executeProposal(id);
+      await tx.wait();
+      await fetchProposals();
+    } catch (err) {
+      alert("Error executing: " + (err.reason || err.message));
+    } finally {
+      setTxPending(false);
+    }
+  };
+
   return (
     <div className="app-container">
       <nav className="nav">
@@ -74,7 +104,11 @@ function App() {
       </nav>
 
       {account ? (
-        <main>
+        <motion.main 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
           <CreateProposal onCreate={handleCreate} />
           
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
@@ -87,27 +121,41 @@ function App() {
           <div className="proposal-list">
             {loading && <p>Loading proposals...</p>}
             {!loading && proposals.length === 0 && <p style={{ color: 'var(--text-muted)' }}>No proposals found yet.</p>}
-            {proposals.map((prop) => (
-              <ProposalCard key={prop.id.toString()} proposal={prop} onVote={handleVote} />
-            ))}
+            <AnimatePresence>
+              {proposals.map((prop) => (
+                <ProposalCard key={prop.id.toString()} proposal={prop} onVote={handleVote} onExecute={handleExecute} />
+              ))}
+            </AnimatePresence>
           </div>
-        </main>
+        </motion.main>
       ) : (
-        <div className="glass-card" style={{ textAlign: 'center', padding: '4rem' }}>
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="glass-card" 
+          style={{ textAlign: 'center', padding: '4rem' }}
+        >
           <Wallet size={48} style={{ color: 'var(--primary)', marginBottom: '1.5rem' }} />
           <h1>Welcome to GOV.DAO</h1>
           <p style={{ color: 'var(--text-muted)', marginBottom: '2rem' }}>Please connect your wallet to view and participate in governance.</p>
           <button className="btn btn-primary" style={{ margin: '0 auto' }} onClick={connectWallet}>Connect MetaMask</button>
-        </div>
+        </motion.div>
       )}
 
-      {txPending && (
-        <div style={{ position: 'fixed', bottom: '2rem', right: '2rem' }}>
-          <div className="glass-card" style={{ padding: '1rem 2rem', background: 'var(--primary)', color: 'white' }}>
-            Transaction Pending... Please wait.
-          </div>
-        </div>
-      )}
+      <AnimatePresence>
+        {txPending && (
+          <motion.div 
+            initial={{ opacity: 0, y: 100 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 100 }}
+            style={{ position: 'fixed', bottom: '2rem', right: '2rem', zIndex: 100 }}
+          >
+            <div className="glass-card" style={{ padding: '1rem 2rem', background: 'var(--primary)', color: 'white' }}>
+              Transaction Pending... Please wait.
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

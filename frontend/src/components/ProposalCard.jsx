@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { ThumbsUp, ThumbsDown, Clock, CheckCircle } from 'lucide-react';
+import { motion } from 'framer-motion';
 
-const ProposalCard = ({ proposal, onVote }) => {
+const ProposalCard = ({ proposal, onVote, onExecute }) => {
   const [loading, setLoading] = useState(false);
   const isExpired = Number(proposal.deadline) < Date.now() / 1000;
 
@@ -15,14 +16,21 @@ const ProposalCard = ({ proposal, onVote }) => {
   };
 
   return (
-    <div className="glass-card" style={{ marginBottom: '1.5rem', borderLeft: proposal.executed ? '4px solid var(--success)' : '1px solid var(--glass-border)' }}>
+    <motion.div 
+      layout
+      initial={{ opacity: 0, x: -20 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, scale: 0.95 }}
+      className="glass-card" 
+      style={{ marginBottom: '1.5rem', borderLeft: proposal.executed ? '4px solid var(--success)' : '1px solid var(--glass-border)' }}
+    >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <div>
           <h3 style={{ margin: 0, color: 'var(--text-main)' }}>{proposal.title}</h3>
           <p style={{ color: 'var(--text-muted)', marginTop: '0.5rem' }}>{proposal.description}</p>
         </div>
-        <span className={`badge ${isExpired ? 'badge-passed' : 'badge-active'}`}>
-          {proposal.executed ? 'Executed' : isExpired ? 'Voting Ended' : 'Active'}
+        <span className={`badge ${proposal.executed ? 'badge-passed' : isExpired ? (proposal.yesVotes > proposal.noVotes ? 'badge-passed' : 'badge-failed') : 'badge-active'}`}>
+          {proposal.executed ? 'Executed' : isExpired ? (proposal.yesVotes > proposal.noVotes ? 'Passed' : 'Failed') : 'Active'}
         </span>
       </div>
 
@@ -36,8 +44,19 @@ const ProposalCard = ({ proposal, onVote }) => {
           <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>AGAINST</div>
         </div>
 
-        <div style={{ marginLeft: 'auto', display: 'flex', gap: '0.5rem' }}>
-          {!isExpired && !proposal.executed && (
+        <div style={{ marginLeft: 'auto', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+          {proposal.executed && (
+            <span style={{ color: 'var(--success)', fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+              <CheckCircle size={16} /> Completed
+            </span>
+          )}
+          {proposal.userHasVoted && !proposal.executed && (
+            <span style={{ color: 'var(--accent)', fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+              <CheckCircle size={16} /> Voted
+            </span>
+          )}
+          
+          {!isExpired && !proposal.executed && !proposal.userHasVoted && (
             <>
               <button 
                 className="btn btn-primary" 
@@ -57,9 +76,20 @@ const ProposalCard = ({ proposal, onVote }) => {
               </button>
             </>
           )}
+
+          {isExpired && !proposal.executed && proposal.yesVotes > proposal.noVotes && (
+            <button 
+              className="btn btn-primary" 
+              style={{ background: 'var(--success)' }}
+              onClick={() => onExecute(proposal.id)}
+              disabled={loading}
+            >
+              Execute Decision
+            </button>
+          )}
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

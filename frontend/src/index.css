@@ -132,6 +132,7 @@ body {
 
 .badge-active { background: rgba(34, 211, 238, 0.2); color: var(--accent); }
 .badge-passed { background: rgba(16, 185, 129, 0.2); color: var(--success); }
+.badge-failed { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
 
 @keyframes spin {
   from { transform: rotate(0deg); }
