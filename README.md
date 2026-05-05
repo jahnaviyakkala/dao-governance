@@ -128,7 +128,7 @@ The smart contracts have been configured for deployment on the **SecureChain AI 
 
 The frontend is designed for seamless deployment on Vercel.
 
-**Live Demo**: [dao-governance-platform.vercel.app](https://dao-governance-platform.vercel.app)
+**Live Demo**: [frontend-five-delta-21.vercel.app](https://frontend-five-delta-21.vercel.app)
 
 ---
 
