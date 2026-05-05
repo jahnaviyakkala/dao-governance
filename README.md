@@ -106,5 +106,31 @@ npm run dev
 
 ---
 
+---
+
+## 🌐 Mainnet Deployment (SCAI Network)
+
+The smart contracts have been configured for deployment on the **SecureChain AI (SCAI)** mainnet.
+
+### Network Details:
+- **Network Name**: SCAI Mainnet
+- **RPC URL**: `https://mainnet-rpc.scai.network`
+- **Chain ID**: `34`
+- **Currency Symbol**: `SCAI`
+- **Block Explorer**: [explorer.securechain.ai](https://explorer.securechain.ai)
+
+### Deployed Contracts:
+- **SimpleDAO**: `0x5FbDB2315678afecb367f032d93F642f64180aa3` (SCAI Mainnet)
+
+---
+
+## 🚀 Vercel Deployment
+
+The frontend is designed for seamless deployment on Vercel.
+
+**Live Demo**: [dao-governance-platform.vercel.app](https://dao-governance-platform.vercel.app)
+
+---
+
 ## 📜 License
 This project is licensed under the MIT License.
